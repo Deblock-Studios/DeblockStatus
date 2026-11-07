@@ -8,8 +8,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "wrangler dev",
-    "dev:cron": "wrangler dev --test-scheduled",
+    "dev": "wrangler dev --local",
+    "dev:cron": "wrangler dev --local --test-scheduled",
     "deploy": "wrangler deploy",
     "logs": "wrangler tail",
     "kv:create": "wrangler kv namespace create STATUS_KV"

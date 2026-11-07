@@ -109,6 +109,10 @@ Une page s'ouvre dans votre navigateur : autorisez Wrangler. Pour vérifier :
 npx wrangler whoami
 ```
 
+> Cette connexion ne sert qu'à **créer le KV et déployer**. Le mode local
+> (`npm run dev`) fonctionne sans compte Cloudflare, sans connexion et même hors ligne :
+> vous pouvez tester le Worker avant de vous connecter.
+
 ### 3.3 Créer le stockage KV
 
 ```bash
@@ -154,12 +158,17 @@ curl http://localhost:8787/api/status
 Vous devez recevoir un JSON avec vos services. Comme le cron ne tourne pas encore en
 local, l'API teste les services à la volée (`"source": "live"`).
 
+Les scripts `dev` et `dev:cron` forcent le **mode local** (`wrangler dev --local`) :
+le Worker tourne sur votre machine, avec un KV local, et n'essaie pas de joindre
+Cloudflare. C'est volontaire : le mode distant exige un sous-domaine `workers.dev`
+configuré et n'apporte rien pour développer.
+
 Pour simuler un passage du cron (et donc remplir l'historique local) :
 
 ```bash
 npm run dev:cron
 # dans un autre terminal :
-curl "http://localhost:8787/cdn-cgi/handler/scheduled?cron=*/5+*+*+*+*"
+curl "http://localhost:8787/__scheduled?cron=*/5+*+*+*+*"
 ```
 
 Relancez ensuite `/api/status` : `"source"` devient `"kv"` et l'historique grandit
@@ -427,6 +436,8 @@ Cloudflare KV est **à cohérence éventuelle** : une écriture peut mettre jusq
 | Les chiffres ne bougent pas | Cache navigateur/API de 30 s, ou cron en retard | Attendez ~1 min, cliquez sur « Actualiser » |
 | `npm install` échoue sur Node | Version de Node trop ancienne | Installez Node.js 22 LTS |
 | `wrangler login` n'ouvre rien (serveur distant) | Pas de navigateur disponible | Lancez la commande sur votre machine locale |
+| `You need to register a workers.dev subdomain before running the dev command in remote mode` | `wrangler dev` a basculé en mode distant (option `--remote` ou binding KV marqué `remote: true`) | `npm run dev` force `--local` ; sinon lancez `npx wrangler dev --local`. Le mode distant exige un sous-domaine `workers.dev` (Dashboard → Workers & Pages → Onboarding) |
+| Deux bindings KV s'affichent au démarrage, dont un nommé `deblock_status_api_STATUS_KV` | Wrangler a provisionné un namespace lors d'un essai en mode distant, ou une entrée a été ajoutée à la main | Supprimez l'entrée en trop dans `wrangler.jsonc` et gardez un seul `STATUS_KV` avec l'`id` réel (`git diff backend/wrangler.jsonc` pour voir la différence) |
 
 Afficher les logs en direct :
 
@@ -487,9 +498,9 @@ Le code du Worker tient dans un seul fichier, commenté en français :
 | `npm install` | Installe Wrangler |
 | `npx wrangler login` | Connecte le terminal à votre compte Cloudflare |
 | `npm run kv:create` | Crée le namespace KV et affiche son `id` |
-| `npm run dev` | Lance le Worker en local sur <http://localhost:8787> |
+| `npm run dev` | Lance le Worker en local sur <http://localhost:8787> (mode `--local`) |
 | `npm run dev:cron` | Idem, avec possibilité de simuler le cron |
-| `curl "http://localhost:8787/cdn-cgi/handler/scheduled?cron=*/5+*+*+*+*"` | Déclenche un passage du cron en local |
+| `curl "http://localhost:8787/__scheduled?cron=*/5+*+*+*+*"` | Déclenche un passage du cron en local |
 | `npm run deploy` | Déploie (ou met à jour) le Worker et ses crons |
 | `npm run logs` | Suit les logs de production en direct |
 | `npx wrangler whoami` | Vérifie le compte connecté |
