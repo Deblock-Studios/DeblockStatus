@@ -334,15 +334,25 @@
     const errorHtml = service.error
       ? `<p class="service-error">${escapeHtml(service.error)}</p>`
       : "";
+    const providersHtml =
+      Array.isArray(service.providers) && service.providers.length
+        ? `<div class="provider-list">
+             <span class="provider-list-label">Fournisseurs IA</span>
+             ${service.providers.map(providerRow).join("")}
+           </div>`
+        : "";
+
+    const name = escapeHtml(service.name || service.id);
+    const heading = service.url
+      ? `<a href="${escapeAttribute(service.url)}" target="_blank" rel="noopener">${name}</a>`
+      : `<span class="service-name-private">${name}</span>`;
 
     return `
       <article class="service-card" data-status="${status}">
         <div class="service-head">
           <div>
             <h3 class="service-name">
-              <a href="${escapeAttribute(service.url)}" target="_blank" rel="noopener">${escapeHtml(
-                service.name || service.id,
-              )}</a>
+              ${heading}
             </h3>
             ${
               service.description
@@ -356,6 +366,7 @@
           </span>
         </div>
         ${errorHtml}
+        ${providersHtml}
         <div class="service-meta">
           <div class="meta" title="${escapeAttribute(
             service.httpStatus ? `Dernier code HTTP : ${service.httpStatus}` : "Code HTTP inconnu",
@@ -384,6 +395,36 @@
           <span>maintenant</span>
         </div>
       </article>`;
+  }
+
+  function providerRow(provider) {
+    const status = normalizeStatus(provider.status);
+    const role = provider.role === "fallback" ? "fallback" : "primary";
+    const roleLabel = role === "fallback" ? "Fallback" : "Principal";
+    const details = [];
+    if (provider.detail) details.push(provider.detail);
+    if (provider.avgMs != null) details.push(`${formatMs(provider.avgMs)} en moyenne`);
+    if (provider.successRate != null) {
+      details.push(`${nf.format(provider.successRate)}\u00a0% de réussite`);
+    }
+
+    return `
+      <div class="provider-row" data-status="${status}">
+        <span class="provider-role" data-role="${role}">${roleLabel}</span>
+        <div class="provider-main">
+          <span class="provider-name">${escapeHtml(provider.name || provider.id)}</span>
+          <code class="provider-model">${escapeHtml(provider.model || "modèle inconnu")}</code>
+        </div>
+        <span class="provider-state">
+          <span class="status-dot" data-status="${status}" aria-hidden="true"></span>
+          ${STATUS_LABEL[status]}
+        </span>
+        ${
+          details.length
+            ? `<span class="provider-detail">${escapeHtml(details.join(" · "))}</span>`
+            : ""
+        }
+      </div>`;
   }
 
   function heartbeatSlots(history, currentLatency) {
@@ -600,6 +641,28 @@
         downAt: [],
         uptime: { day: 100, week: 100, month: 100 },
       },
+      {
+        id: "auto-translate-ai",
+        name: "Auto-Translate (AI)",
+        description: "Traduction automatique par IA — fournisseurs principal et fallback",
+        url: "https://vyceai.com/health",
+        category: "Services IA",
+        base: 240,
+        slowAt: [],
+        downAt: [],
+        uptime: { day: 100, week: 99.98, month: 99.95 },
+        providers: [
+          {
+            id: "vyce-primary",
+            name: "Vyce AI",
+            model: "deepseek-v4.1",
+            role: "primary",
+            status: "operational",
+            avgMs: 13298,
+            successRate: 100,
+          },
+        ],
+      },
     ];
 
     const services = defs.map((def) => {
@@ -633,6 +696,7 @@
         checkedAt: new Date(last.at).toISOString(),
         uptime: def.uptime,
         history,
+        providers: def.providers || null,
       };
     });
 
