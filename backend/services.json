@@ -43,5 +43,14 @@
     "category": "Infrastructure",
     "timeoutMs": 10000,
     "degradedMs": 3000
+  },
+  {
+    "id": "server-list",
+    "name": "Liste des serveurs",
+    "description": "Liste des serveurs disponibles",
+    "url": "https://multicraft-servers.creatif-france.workers.dev",
+    "category": "Sites & outils",
+    "timeoutMs": 10000,
+    "degradedMs": 3000
   }
 ]
