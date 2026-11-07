@@ -221,12 +221,20 @@ dans `wrangler.jsonc` puis redéployez :
 
 ```jsonc
 "vars": {
-  "ALLOWED_ORIGINS": "https://status.deblock-studios.fr,https://deblock-studios.fr"
+  "ALLOWED_ORIGINS": "https://deblockstatus.vercel.app"
 }
 ```
 
-`"*"` (valeur par défaut) autorise tous les sites : acceptable pour des données
-publiques en lecture seule, mais moins propre.
+Mettez l'origine **exacte**, sans chemin ni slash final : `https://site.com`.
+Une valeur comme `https://site.com/*` n'est pas une origine valide et fait échouer
+le CORS dans le navigateur (`Failed to fetch`). Le Worker normalise désormais ces
+valeurs (slash final et `/*` retirés), mais autant écrire la bonne dès le départ.
+
+Après toute modification de `ALLOWED_ORIGINS`, **redéployez** : la valeur est
+embarquée dans le Worker, un simple rechargement de la page ne suffit pas.
+
+`"*"` autorise tous les sites : acceptable pour des données publiques en lecture
+seule, mais moins propre. Ce dépôt est configuré pour `https://deblockstatus.vercel.app`.
 
 ---
 
@@ -371,7 +379,7 @@ Valeurs de `status` : `operational`, `degraded`, `down`, `unknown`.
   "workers_dev": true,                   // URL *.workers.dev activée
   "observability": { "enabled": true },  // logs visibles dans le dashboard
   "triggers": { "crons": ["*/5 * * * *"] },
-  "vars": { "ALLOWED_ORIGINS": "*" },
+  "vars": { "ALLOWED_ORIGINS": "https://deblockstatus.vercel.app" },
   "kv_namespaces": [{ "binding": "STATUS_KV", "id": "…" }]
 }
 ```
@@ -432,7 +440,7 @@ Cloudflare KV est **à cohérence éventuelle** : une écriture peut mettre jusq
 | `HTTP 403` sur un site qui marche au navigateur | Protection anti-bot (Cloudflare, captcha) | Surveillez une autre URL ou ajoutez le statut attendu |
 | « Délai dépassé (10000 ms) » | Site lent ou injoignable | Augmentez `timeoutMs` (max 25 000), vérifiez le service |
 | La page affiche « Mode démonstration » | `js/config.js` contient encore l'URL d'exemple, ou l'API est injoignable | Collez l'URL réelle du Worker, terminez par `/api/status` |
-| Erreur CORS dans la console du navigateur | `ALLOWED_ORIGINS` ne contient pas le domaine du front | Ajoutez le domaine exact (avec `https://`, sans slash final) puis redéployez |
+| Erreur CORS / `Failed to fetch` dans la console du navigateur | `ALLOWED_ORIGINS` ne contient pas le domaine du front, ou contient un chemin (`https://site.com/*`) | Mettez l'origine exacte (`https://site.com`, sans slash final) puis **redéployez** |
 | Les chiffres ne bougent pas | Cache navigateur/API de 30 s, ou cron en retard | Attendez ~1 min, cliquez sur « Actualiser » |
 | `npm install` échoue sur Node | Version de Node trop ancienne | Installez Node.js 22 LTS |
 | `wrangler login` n'ouvre rien (serveur distant) | Pas de navigateur disponible | Lancez la commande sur votre machine locale |

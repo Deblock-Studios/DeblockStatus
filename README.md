@@ -69,7 +69,7 @@ npx serve .
 # ou : python3 -m http.server 3000
 ```
 
-Sans URL d'API valide, la page s'affiche en mode démonstration (`?demo=1` force ce mode).
+Avec `demoFallback: false` (réglage actuel), une API injoignable affiche un message d'erreur plutôt que des données fictives ; `?demo=1` dans l'URL force la démonstration à tout moment.
 
 ### 4. Mise en ligne du front
 

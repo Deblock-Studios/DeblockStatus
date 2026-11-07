@@ -386,26 +386,41 @@ function json(payload, status, extraHeaders = {}) {
   });
 }
 
+// Accepte "https://site.com", "https://site.com/" et "https://site.com/*".
+// Une valeur avec un chemin (ex. "https://site.com/*") est refusée par les
+// navigateurs : on la normalise pour éviter un CORS cassé côté client.
+function normalizeOrigin(value) {
+  return String(value)
+    .trim()
+    .replace(/\/+$/, "")
+    .replace(/\/\*$/, "")
+    .toLowerCase();
+}
+
 function corsHeaders(request, env) {
   const allowed = String(env.ALLOWED_ORIGINS || "*")
     .split(",")
-    .map((value) => value.trim())
+    .map(normalizeOrigin)
     .filter(Boolean);
   const origin = request.headers.get("origin") || "";
   const allowAll = allowed.includes("*");
   const allowedOrigin = allowAll
     ? "*"
-    : allowed.includes(origin)
+    : allowed.includes(normalizeOrigin(origin))
       ? origin
-      : allowed[0] || "*";
+      : null;
 
-  return {
-    "access-control-allow-origin": allowedOrigin,
+  const headers = {
     "access-control-allow-methods": "GET, HEAD, OPTIONS",
     "access-control-allow-headers": "content-type, accept",
     "access-control-max-age": "86400",
     vary: "Origin",
   };
+  // Origine non autorisée : on n'envoie pas d'en-tête CORS, le navigateur
+  // bloque la lecture (comportement attendu) au lieu de recevoir une valeur
+  // invalide qui casserait aussi les origines légitimes.
+  if (allowedOrigin) headers["access-control-allow-origin"] = allowedOrigin;
+  return headers;
 }
 
 async function mapLimit(items, limit, task) {

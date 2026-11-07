@@ -31,19 +31,21 @@
   },
 
   "vars": {
-    // Domaines autorisés à appeler l'API (CORS).
+    // Domaines autorisés à appeler l'API (CORS), séparés par des virgules.
     //   "*" = tout le monde (l'API est publique et en lecture seule)
-    //   Plus propre en prod : "https://status.deblock-studios.vercel.app,https://deblock-studios.vercel.app"
-    "ALLOWED_ORIGINS": "*"
+    //   Sinon, mettez l'origine EXACTE, sans chemin ni slash final :
+    //   "https://deblockstatus.vercel.app" (et non "https://deblockstatus.vercel.app/*")
+    "ALLOWED_ORIGINS": "https://deblockstatus.vercel.app"
   },
 
   // Stockage de l'historique (KV).
-  // 1. `npm run kv:create` → copie l'id affiché
-  // 2. remplace REPLACEZ_PAR_L_ID_KV ci-dessous par cet id
+  // Un seul binding par namespace : pas de doublon, pas de "remote": true
+  // (cette option ne sert qu'au développement local en mode distant).
+  // Pour un autre compte : `npm run kv:create` puis collez l'id affiché ici.
   "kv_namespaces": [
     {
       "binding": "STATUS_KV",
-      "id": "REPLACEZ_PAR_L_ID_KV"
+      "id": "8f8aff460a6843f4bbaefe95a719a8cb"
     }
   ]
 }
