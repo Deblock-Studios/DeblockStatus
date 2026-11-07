@@ -1,0 +1,49 @@
+{
+  // ───────────────────────────────────────────────────────────
+  //  Configuration du Worker (le fichier le plus important)
+  //  Doc : https://developers.cloudflare.com/workers/wrangler/configuration/
+  // ───────────────────────────────────────────────────────────
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Nom du Worker sur Cloudflare (l'URL sera <nom>.<sous-domaine>.workers.dev)
+  "name": "deblock-status-api",
+
+  // Point d'entrée du code
+  "main": "src/index.js",
+
+  // Version du runtime Cloudflare. Ne pas mettre une date dans le futur.
+  "compatibility_date": "2026-11-01",
+
+  // Expose aussi le Worker sur *.workers.dev
+  "workers_dev": true,
+
+  // Logs visibles dans le dashboard Cloudflare et via `npm run logs`
+  "observability": {
+    "enabled": true
+  },
+
+  // Ping automatique de tous les services.
+  //   */5 * * * *  = toutes les 5 minutes (recommandé)
+  //   * * * * *    = toutes les minutes (maximum autorisé par Cloudflare)
+  // Astuce : après avoir modifié le cron, relancez `npm run deploy`.
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+
+  "vars": {
+    // Domaines autorisés à appeler l'API (CORS).
+    //   "*" = tout le monde (l'API est publique et en lecture seule)
+    //   Plus propre en prod : "https://status.deblock-studios.vercel.app,https://deblock-studios.vercel.app"
+    "ALLOWED_ORIGINS": "*"
+  },
+
+  // Stockage de l'historique (KV).
+  // 1. `npm run kv:create` → copie l'id affiché
+  // 2. remplace REPLACEZ_PAR_L_ID_KV ci-dessous par cet id
+  "kv_namespaces": [
+    {
+      "binding": "STATUS_KV",
+      "id": "REPLACEZ_PAR_L_ID_KV"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "multicraft-info",
+    "name": "MultiCraft Info",
+    "description": "Documentation et infos sur les serveurs Minecraft",
+    "url": "https://multicraft-info.netlify.app",
+    "category": "Sites & outils",
+    "timeoutMs": 10000,
+    "degradedMs": 2500
+  },
+  {
+    "id": "multidb",
+    "name": "MultiDB",
+    "description": "Base de données communautaire MultiCraft",
+    "url": "https://multidb.vercel.app",
+    "category": "Sites & outils",
+    "timeoutMs": 10000,
+    "degradedMs": 2500
+  },
+  {
+    "id": "deblockcord",
+    "name": "DeblockCord",
+    "description": "Site de la communauté Discord",
+    "url": "https://deblockcord.netlify.app/",
+    "category": "Communauté",
+    "timeoutMs": 10000,
+    "degradedMs": 2500
+  },
+  {
+    "id": "blog",
+    "name": "Blog Deblock Studios",
+    "description": "Articles et actualités du studio",
+    "url": "https://blog-deblock-studios.vercel.app",
+    "category": "Communauté",
+    "timeoutMs": 10000,
+    "degradedMs": 2500
+  },
+  {
+    "id": "github",
+    "name": "GitHub — Deblock Studios",
+    "description": "Dépôts publics de l'organisation",
+    "url": "https://github.com/Deblock-Studios",
+    "category": "Infrastructure",
+    "timeoutMs": 10000,
+    "degradedMs": 3000
+  }
+]
